@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #edf2f7; padding: 40px 20px; margin: 0; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        h1, h2 { text-align: center; color: #1a202c; }
+        
+        /* NEW: Stats Bar Styling */
+        .stats-bar { display: flex; justify-content: space-around; background: #2b6cb0; color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 32px; display: block; color: #ebf8ff; }
+        
+        #winnerText { background: #f0fff4; border: 1px solid #c6f6d5; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 24px; color: #2f855a; font-weight: bold;}
+        .chart-box { margin-bottom: 40px; padding: 20px; background: #f7fafc; border-radius: 12px; }
+        
+        /* NEW: Toolbar Styling */
+        .toolbar { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        #searchInput { padding: 10px; width: 60%; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; }
+        .btn-export { background: #38a169; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-export:hover { background: #2f855a; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #2b6cb0; color: white; }
+        .voted-yes { color: #38a169; font-weight: bold; }
+        .voted-no { color: #e53e3e; font-weight: bold; }
+        .btn-logout { width: 100%; padding: 15px; background: #e53e3e; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 40px; font-weight: bold; font-size: 16px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👑 Admin Control Panel</h1>
+
+        <div class="stats-bar">
+            <div class="stat-item">Total Citizens<span class="stat-number" id="statTotal">0</span></div>
+            <div class="stat-item">Votes Cast<span class="stat-number" id="statVoted">0</span></div>
+            <div class="stat-item" style="color: #fed7d7;">Votes Left<span class="stat-number" style="color: #fed7d7;" id="statLeft">0</span></div>
+        </div>
+
+        <h3 id="winnerText">🏆 Current Leader: Loading...</h3>
+        <div class="chart-box"><canvas id="resultsChart"></canvas></div>
+        <hr>
+        <h2>📋 Citizen Voting Status</h2>
+
+        <div class="toolbar">
+            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="🔍 Search by Name or CNIC...">
+            <button class="btn-export" onclick="exportToCSV()">📥 Download CSV</button>
+        </div>
+
+        <table id="citizenTable">
+            <thead><tr><th>Name</th><th>CNIC</th><th>Status</th></tr></thead>
+            <tbody id="voterTableBody"></tbody>
+        </table>
+        <button class="btn-logout" onclick="logout()">Logout Securely</button>
+    </div>
+
+    <script>
+        if (localStorage.getItem("role") !== "admin") { alert("Access Denied."); window.location.href = "index.html"; }
+
+        let myChart = null;
+
+        async function fetchResults() {
+            const res = await fetch('http://127.0.0.1:8000/results');
+            const data = await res.json();
+            
+            // Update the new Stats Bar!
+            document.getElementById("statTotal").textContent = data.stats.total;
+            document.getElementById("statVoted").textContent = data.stats.voted;
+            document.getElementById("statLeft").textContent = data.stats.left;
+            
+            document.getElementById("winnerText").textContent = "🏆 Current Leader: " + data.winner;
+
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            if (myChart != null) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: data.labels, datasets: [{ label: 'Votes', data: data.data, backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0'] }] },
+                options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        async function fetchVoters() {
+            const res = await fetch('http://127.0.0.1:8000/admin/voters');
+            const data = await res.json();
+            const tbody = document.getElementById('voterTableBody');
+            tbody.innerHTML = ""; 
+            data.voters.forEach(voter => {
+                const tr = document.createElement('tr');
+                let statusText = voter.hasVoted ? "✔ Voted" : "❌ Not Voted Yet";
+                let statusClass = voter.hasVoted ? "voted-yes" : "voted-no";
+                tr.innerHTML = `<td>${voter.name}</td><td>${voter.cnic}</td><td class="${statusClass}">${statusText}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // NEW: Search Function
+        function searchTable() {
+            let input = document.getElementById("searchInput").value.toUpperCase();
+            let tr = document.getElementById("citizenTable").getElementsByTagName("tr");
+            for (let i = 1; i < tr.length; i++) {
+                let text = tr[i].textContent || tr[i].innerText;
+                tr[i].style.display = text.toUpperCase().indexOf(input) > -1 ? "" : "none";
+            }
+        }
+
+        // NEW: Export to CSV Function
+        function exportToCSV() {
+            let csv = [];
+            let rows = document.querySelectorAll("table tr");
+            for (let i = 0; i < rows.length; i++) {
+                let row = [], cols = rows[i].querySelectorAll("td, th");
+                for (let j = 0; j < cols.length; j++) row.push(cols[j].innerText);
+                csv.push(row.join(","));
+            }
+            let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+            let link = document.createElement("a");
+            link.download = "Election_Results.csv";
+            link.href = window.URL.createObjectURL(csvFile);
+            link.click();
+        }
+
+        function logout() { localStorage.clear(); window.location.href = "index.html"; }
+
+        fetchResults(); fetchVoters();
+    </script>
+</body>
+</html>
