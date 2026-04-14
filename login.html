@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Voting App - Login</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 320px;
+            transition: transform 0.3s ease;
+        }
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+        h2 {
+            text-align: center;
+            color: #1a365d;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #3182ce;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #3182ce, #2b6cb0);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(49, 130, 206, 0.3);
+        }
+        button:hover {
+            background: linear-gradient(to right, #2b6cb0, #2c5282);
+            box-shadow: 0 6px 8px rgba(49, 130, 206, 0.4);
+            transform: translateY(-2px);
+        }
+        #message {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .error { color: #e53e3e; }
+        .success { color: #38a169; }
+        </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Voting Login</h2>
+        <form id="loginForm">
+            <label for="cnic">CNIC:</label>
+            <input type="text" id="cnic" placeholder="42101-1234567-1" required pattern="\d{5}-\d{7}-\d{1}">
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="********" required>
+            
+            <button type="submit">Login</button>
+            <p id="message"></p>
+        </form>
+    </div>
+
+    <script>
+        // --- JavaScript Logic ---
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            // Prevent the page from refreshing when clicking submit
+            event.preventDefault();
+
+            const cnic = document.getElementById('cnic').value;
+            const password = document.getElementById('password').value;
+            const messageElement = document.getElementById('message');
+
+            messageElement.textContent = "Logging in...";
+            messageElement.className = "";
+
+            try {
+                // Send data to our FastAPI backend
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ cnic: cnic, password: password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageElement.textContent = "✔ Login Success";
+                    messageElement.className = "success";
+                    
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("userName", data.name);
+                    localStorage.setItem("hasVoted", data.hasVoted);
+                    localStorage.setItem("role", data.role); // Save their role
+
+                    // THE TRAFFIC COP: Redirect based on role
+                    setTimeout(() => {
+                        if (data.role === "admin") {
+                            window.location.href = "admin.html"; // Send admins here
+                        } else {
+                            window.location.href = "dashboard.html"; // Send voters here
+                        }
+                    }, 1000);
+                } else {
+                    // Login Failed (Wrong CNIC or Password)
+                    messageElement.textContent = "❌ " + data.detail;
+                    messageElement.className = "error";
+                }
+            } catch (error) {
+                console.error("Error connecting to server:", error);
+                messageElement.textContent = "❌ Cannot connect to server. Is it running?";
+                messageElement.className = "error";
+            }
+        });
+    </script>
+</body>
+</html>
