@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Voting App - Dashboard</title>
+    <style>
+       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .dashboard-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 450px;
+        }
+        h2 {
+            color: #1a365d;
+            text-align: center;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 15px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2d3748;
+            margin-top: 30px;
+        }
+        .status-box {
+            background-color: #edf2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 15px;
+        }
+        .not-voted { color: #e53e3e; font-weight: 700; }
+        .voted { color: #38a169; font-weight: 700; }
+        
+        .candidate-card {
+            border: 1px solid #e2e8f0;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .candidate-card:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+        .candidate-info h4 {
+            margin: 0 0 5px 0;
+            color: #2b6cb0;
+            font-size: 16px;
+        }
+        .candidate-info p {
+            margin: 0;
+            font-size: 13px;
+            color: #718096;
+            font-weight: 600;
+        }
+        .vote-btn {
+            padding: 8px 20px;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .vote-btn:hover:not(:disabled) {
+            background-color: #2b6cb0;
+        }
+        .vote-btn:disabled {
+            background-color: #cbd5e0;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background-color: #fc8181;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 30px;
+            transition: background-color 0.2s;
+        }
+        .btn-logout:hover {
+            background-color: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h2 id="welcomeMessage">Welcome, Voter</h2>
+        
+        <div class="status-box">
+            <p>Vote Status:</p>
+            <p id="voteStatus" class="not-voted">Checking status...</p>
+        </div>
+
+        <h3>Candidates</h3>
+        
+        <div class="candidate-card">
+            <div class="candidate-info">
+                <h4>1️⃣ Ahmed Khan</h4>
+                <p>Party: ABC</p>
+            </div>
+            <button class="vote-btn" onclick="castVote(1)">Vote</button>
+        </div>
+
+        <div class="candidate-card">
+            <div class="candidate-info">
+                <h4>2️⃣ Usman Ali</h4>
+                <p>Party: XYZ</p>
+            </div>
+            <button class="vote-btn" onclick="castVote(2)">Vote</button>
+        </div>
+        <div class="candidate-card">
+            <div class="candidate-info">
+                <h4>3️⃣ Ayesha Noor</h4>
+                <p>Party: DEF</p>
+            </div>
+            <button class="vote-btn" onclick="castVote(3)">Vote</button>
+        </div>
+
+        <div class="candidate-card">
+            <div class="candidate-info">
+                <h4>4️⃣ Kamran Shah</h4>
+                <p>Party: LMN</p>
+            </div>
+            <button class="vote-btn" onclick="castVote(4)">Vote</button>
+        </div>
+        <button style="width: 100%; background-color: #dc3545; margin-top: 20px;" onclick="logout()">Logout</button>
+    </div>
+     <script>
+        const token = localStorage.getItem("token");
+        if (!token) { alert("Please log in."); window.location.href = "index.html"; }
+
+        const userName = localStorage.getItem("userName");
+        const hasVoted = localStorage.getItem("hasVoted") === "true"; 
+        
+        document.getElementById("welcomeMessage").textContent = "Welcome, " + userName;
+        const statusElement = document.getElementById("voteStatus");
+        const voteButtons = document.querySelectorAll(".vote-btn");
+
+        if (hasVoted) {
+            statusElement.textContent = "✔ You have already voted.";
+            statusElement.className = "voted";
+            voteButtons.forEach(btn => btn.disabled = true);
+            
+            // NEW: Show Download Receipt Button if they already voted!
+            const receiptBtn = document.createElement("button");
+            receiptBtn.textContent = "📥 Download Blockchain Receipt";
+            receiptBtn.style.backgroundColor = "#48bb78";
+            receiptBtn.style.width = "100%";
+            receiptBtn.style.marginTop = "10px";
+            receiptBtn.onclick = downloadReceipt;
+            statusElement.parentElement.appendChild(receiptBtn);
+        } else {
+            statusElement.textContent = "❌ Not Voted Yet";
+            statusElement.className = "not-voted";
+        }
+
+        async function castVote(candidateID) {
+            if (!confirm("Are you sure? You cannot change your vote later!")) return;
+            try {
+                const response = await fetch('/api/vote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ candidateID: candidateID })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem("hasVoted", "true");
+                    localStorage.setItem("receiptHash", data.receiptHash); // Save the secure hash
+                    alert("✔ " + data.message);
+                    window.location.reload(); 
+                } else {
+                    alert("❌ " + data.detail);
+                }
+            } catch (error) { alert("❌ Cannot connect to server."); }
+        }
+
+        // NEW: Generate a Text File Receipt
+        function downloadReceipt() {
+            const hash = localStorage.getItem("receiptHash") || "Hash retrieved from backend secure log.";
+            const text = `--- OFFICIAL VOTING RECEIPT ---\nName: ${userName}\nStatus: Voted\nBlockchain Hash: ${hash}\nDate: ${new Date().toLocaleString()}`;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Vote_Receipt_${userName}.txt`;
+            link.click();
+        }
+
+        function logout() { localStorage.clear(); window.location.href = "index.html"; }
+    </script>
+    
+
+        
+</body>
+</html>
