@@ -11,8 +11,7 @@ import hashlib # NEW: Used for Blockchain Security
 app = FastAPI(title="Smart Voting System API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-# --- 2. Database Connection ---
-MONGO_URI = "mongodb+srv://umaimaasif:umaima123456.@cluster0.amdgtd5.mongodb.net/?retryWrites=true&w=majority"
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
 db = client["voting_database"]
 users_collection = db["users"]
