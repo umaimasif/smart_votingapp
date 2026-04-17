@@ -48,7 +48,7 @@ class VoteRequest(BaseModel):
 @app.get("/")
 def home(): return {"message": "Welcome to the Smart Voting Backend!"}
 
-@app.post("/register")
+@app.post("/api/register")
 def register_user(user: UserRegister):
     if users_collection.find_one({"cnic": user.cnic}): raise HTTPException(status_code=400, detail="CNIC already registered")
     users_collection.insert_one({
@@ -57,7 +57,7 @@ def register_user(user: UserRegister):
     })
     return {"message": f"{user.role.capitalize()} registered successfully"}
 
-@app.post("/login")
+@app.post("/api/login")
 def login(request: LoginRequest):
     user = users_collection.find_one({"cnic": request.cnic})
     if not user or not verify_password(request.password, user["password"]): raise HTTPException(status_code=401, detail="Invalid credentials")
