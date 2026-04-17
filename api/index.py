@@ -66,7 +66,12 @@ def home():
 
 @app.get("/api/debug")
 def debug():
-    return {"import_error": _import_error, "python": os.sys.version}
+    try:
+        client.admin.command("ping")
+        db_status = "connected"
+    except Exception as e:
+        db_status = str(e)
+    return {"import_error": _import_error, "python": os.sys.version, "db": db_status}
 
 @app.post("/api/register")
 def register_user(user: UserRegister):
