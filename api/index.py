@@ -95,7 +95,7 @@ def cast_vote(request: VoteRequest, authorization: str = Header(None)):
     # Return the hash so the frontend can make a receipt
     return {"message": "Vote submitted securely to blockchain!", "receiptHash": current_hash}
 
-@app.get("/results")
+@app.get("/api/results")
 def get_results():
     votes = [votes_collection.count_documents({"candidateID": i}) for i in range(1, 5)]
     labels = ["Ahmed Khan", "Usman Ali", "Ayesha Noor", "Kamran Shah"]
@@ -113,7 +113,7 @@ def get_results():
         "stats": {"total": total_citizens, "voted": total_voted, "left": votes_left}
     }
 
-@app.get("/admin/voters")
+@app.get("/api/admin/voters")
 def get_voters():
     voters = list(users_collection.find({"$or": [{"role": "voter"}, {"role": {"$exists": False}}]}, {"_id": 0, "password": 0}))
     return {"voters": voters}
