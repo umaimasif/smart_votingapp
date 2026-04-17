@@ -1,133 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #edf2f7; padding: 40px 20px; margin: 0; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        h1, h2 { text-align: center; color: #1a202c; }
-        
-        /* NEW: Stats Bar Styling */
-        .stats-bar { display: flex; justify-content: space-around; background: #2b6cb0; color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .stat-item { text-align: center; }
-        .stat-number { font-size: 32px; display: block; color: #ebf8ff; }
-        
-        #winnerText { background: #f0fff4; border: 1px solid #c6f6d5; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 24px; color: #2f855a; font-weight: bold;}
-        .chart-box { margin-bottom: 40px; padding: 20px; background: #f7fafc; border-radius: 12px; }
-        
-        /* NEW: Toolbar Styling */
-        .toolbar { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        #searchInput { padding: 10px; width: 60%; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; }
-        .btn-export { background: #38a169; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-export:hover { background: #2f855a; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th { background-color: #2b6cb0; color: white; }
-        .voted-yes { color: #38a169; font-weight: bold; }
-        .voted-no { color: #e53e3e; font-weight: bold; }
-        .btn-logout { width: 100%; padding: 15px; background: #e53e3e; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 40px; font-weight: bold; font-size: 16px;}
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel – Smart Voting</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')})();</script>
+<style>
+:root{--bg:#f0f4f8;--card:#fff;--text:#1a202c;--sub:#4a5568;--border:#e2e8f0;--accent:#2b6cb0;--nav:#1a365d;--sh:rgba(0,0,0,.06);--ok:#38a169;--err:#e53e3e}
+[data-theme=dark]{--bg:#0f1117;--card:#1a1d27;--text:#e2e8f0;--sub:#a0aec0;--border:#2d3748;--accent:#63b3ed;--nav:#0d1526;--sh:rgba(0,0,0,.35)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s}
+nav{background:var(--nav);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.logo{color:#fff;font-weight:700;font-size:17px}.nav-r{display:flex;gap:12px;align-items:center}
+nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;font-weight:600}nav a:hover{color:#fff}
+.tbtn{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:15px}
+main{flex:1;padding:24px 16px}
+.wrap{max-width:1000px;margin:0 auto}
+.card{background:var(--card);border-radius:16px;padding:24px;box-shadow:0 4px 20px var(--sh);margin-bottom:18px}
+/* Stats */
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}
+.scard{background:var(--card);border-radius:14px;padding:20px;text-align:center;box-shadow:0 4px 16px var(--sh)}
+.snum{font-size:36px;font-weight:700;color:var(--accent)}.slbl{font-size:12px;color:var(--sub);margin-top:4px}
+/* Winner */
+.winner{background:linear-gradient(135deg,#38a169,#276749);color:#fff;border-radius:12px;padding:16px 24px;text-align:center;font-size:18px;font-weight:700;margin-bottom:18px}
+/* Integrity + live */
+.meta-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:50px;font-weight:700;font-size:13px}
+.ok-badge{background:#f0fff4;color:#276749;border:2px solid #c6f6d5}[data-theme=dark] .ok-badge{background:rgba(56,161,105,.15)}
+.err-badge{background:#fff5f5;color:#c53030;border:2px solid #fed7d7}[data-theme=dark] .err-badge{background:rgba(229,62,62,.15)}
+.live{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub)}
+.dot{width:9px;height:9px;background:var(--ok);border-radius:50%;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
+/* Charts row */
+.chart2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+canvas{max-height:240px}
+h3{font-size:15px;font-weight:700;margin-bottom:14px}
+/* Anomalies */
+.anom{padding:12px 16px;border-radius:10px;margin-bottom:10px;border-left:4px solid}
+.anom-h{background:#fff5f5;border-color:#e53e3e}[data-theme=dark] .anom-h{background:rgba(229,62,62,.1)}
+.anom-m{background:#fffbeb;border-color:#d69e2e}[data-theme=dark] .anom-m{background:rgba(214,158,46,.1)}
+.anom-type{font-weight:700;font-size:13px}.anom-msg{font-size:13px;color:var(--sub);margin-top:2px}
+.clean{text-align:center;padding:20px;color:var(--ok);font-weight:600}
+/* Table */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+input[type=text]{padding:9px 14px;border:2px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;width:240px}
+input[type=text]:focus{outline:none;border-color:var(--accent)}
+.btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:.2s}
+.btn-g{background:var(--ok);color:#fff}.btn-g:hover{filter:brightness(.9)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:13px}
+th{background:var(--accent);color:#fff;font-weight:600}
+tr:hover td{background:var(--bg)}
+.bv{background:#f0fff4;color:#276749;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.bn{background:#fff5f5;color:#c53030;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+[data-theme=dark] .bv{background:rgba(56,161,105,.2);}[data-theme=dark] .bn{background:rgba(229,62,62,.2);}
+.logout{width:100%;background:var(--err);color:#fff;border:none;padding:13px;border-radius:10px;cursor:pointer;font-weight:700;font-size:14px;margin-top:4px}
+.logout:hover{filter:brightness(.9)}
+@media(max-width:640px){.stats3{grid-template-columns:1fr}.chart2{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>👑 Admin Control Panel</h1>
-
-        <div class="stats-bar">
-            <div class="stat-item">Total Citizens<span class="stat-number" id="statTotal">0</span></div>
-            <div class="stat-item">Votes Cast<span class="stat-number" id="statVoted">0</span></div>
-            <div class="stat-item" style="color: #fed7d7;">Votes Left<span class="stat-number" style="color: #fed7d7;" id="statLeft">0</span></div>
-        </div>
-
-        <h3 id="winnerText">🏆 Current Leader: Loading...</h3>
-        <div class="chart-box"><canvas id="resultsChart"></canvas></div>
-        <hr>
-        <h2>📋 Citizen Voting Status</h2>
-
-        <div class="toolbar">
-            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="🔍 Search by Name or CNIC...">
-            <button class="btn-export" onclick="exportToCSV()">📥 Download CSV</button>
-        </div>
-
-        <table id="citizenTable">
-            <thead><tr><th>Name</th><th>CNIC</th><th>Status</th></tr></thead>
-            <tbody id="voterTableBody"></tbody>
-        </table>
-        <button class="btn-logout" onclick="logout()">Logout Securely</button>
+<nav>
+  <span class="logo">👑 Admin Panel</span>
+  <div class="nav-r">
+    <a href="results.html">📊 Results</a>
+    <a href="blockchain.html">⛓️ Blockchain</a>
+    <button class="tbtn" id="tbtn" onclick="toggleTheme()">🌙</button>
+  </div>
+</nav>
+<main>
+  <div class="wrap">
+    <div class="stats3">
+      <div class="scard"><div class="snum" id="s1">—</div><div class="slbl">Total Citizens</div></div>
+      <div class="scard"><div class="snum" id="s2" style="color:#38a169">—</div><div class="slbl">Votes Cast</div></div>
+      <div class="scard"><div class="snum" id="s3" style="color:#e53e3e">—</div><div class="slbl">Votes Remaining</div></div>
     </div>
 
-    <script>
-        if (localStorage.getItem("role") !== "admin") { alert("Access Denied."); window.location.href = "index.html"; }
+    <div class="winner" id="winner">🏆 Loading…</div>
 
-        let myChart = null;
+    <div class="card">
+      <div class="meta-row">
+        <div id="intBadge"><span class="badge">Checking chain…</span></div>
+        <div class="live"><span class="dot"></span>Live — refreshes every 10s</div>
+      </div>
+    </div>
 
-        async function fetchResults() {
-            const res = await fetch('/api/results');
-            const data = await res.json();
-            
-            // Update the new Stats Bar!
-            document.getElementById("statTotal").textContent = data.stats.total;
-            document.getElementById("statVoted").textContent = data.stats.voted;
-            document.getElementById("statLeft").textContent = data.stats.left;
-            
-            document.getElementById("winnerText").textContent = "🏆 Current Leader: " + data.winner;
+    <div class="chart2">
+      <div class="card"><h3>📊 Vote Distribution</h3><canvas id="barChart"></canvas></div>
+      <div class="card"><h3>📈 Voting Timeline</h3><canvas id="lineChart"></canvas></div>
+    </div>
 
-            const ctx = document.getElementById('resultsChart').getContext('2d');
-            if (myChart != null) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'bar',
-                data: { labels: data.labels, datasets: [{ label: 'Votes', data: data.data, backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0'] }] },
-                options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-        }
+    <div class="card">
+      <h3>🔍 Anomaly Detection</h3>
+      <div id="anomDiv">Scanning…</div>
+    </div>
 
-        async function fetchVoters() {
-            const res = await fetch('/api/admin/voters');
-            const data = await res.json();
-            const tbody = document.getElementById('voterTableBody');
-            tbody.innerHTML = ""; 
-            data.voters.forEach(voter => {
-                const tr = document.createElement('tr');
-                let statusText = voter.hasVoted ? "✔ Voted" : "❌ Not Voted Yet";
-                let statusClass = voter.hasVoted ? "voted-yes" : "voted-no";
-                tr.innerHTML = `<td>${voter.name}</td><td>${voter.cnic}</td><td class="${statusClass}">${statusText}</td>`;
-                tbody.appendChild(tr);
-            });
-        }
+    <div class="card">
+      <div class="toolbar">
+        <h3 style="margin:0">📋 Registered Voters</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="search" placeholder="🔍 Search name or CNIC…" oninput="filterTable()">
+          <button class="btn btn-g" onclick="exportCSV()">📥 Export CSV</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>CNIC</th><th>Status</th></tr></thead>
+        <tbody id="vtbody"></tbody>
+      </table>
+    </div>
 
-        // NEW: Search Function
-        function searchTable() {
-            let input = document.getElementById("searchInput").value.toUpperCase();
-            let tr = document.getElementById("citizenTable").getElementsByTagName("tr");
-            for (let i = 1; i < tr.length; i++) {
-                let text = tr[i].textContent || tr[i].innerText;
-                tr[i].style.display = text.toUpperCase().indexOf(input) > -1 ? "" : "none";
-            }
-        }
+    <button class="logout" onclick="logout()">🚪 Logout</button>
+  </div>
+</main>
+<script>
+if(localStorage.getItem('role')!=='admin'){alert('Access denied.');window.location.href='index.html';}
+const tbtn=document.getElementById('tbtn');
+tbtn.textContent=(localStorage.getItem('theme')||'light')==='dark'?'☀️':'🌙';
+function toggleTheme(){const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);tbtn.textContent=n==='dark'?'☀️':'🌙';}
 
-        // NEW: Export to CSV Function
-        function exportToCSV() {
-            let csv = [];
-            let rows = document.querySelectorAll("table tr");
-            for (let i = 0; i < rows.length; i++) {
-                let row = [], cols = rows[i].querySelectorAll("td, th");
-                for (let j = 0; j < cols.length; j++) row.push(cols[j].innerText);
-                csv.push(row.join(","));
-            }
-            let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
-            let link = document.createElement("a");
-            link.download = "Election_Results.csv";
-            link.href = window.URL.createObjectURL(csvFile);
-            link.click();
-        }
+let barChart=null,lineChart=null;
 
-        function logout() { localStorage.clear(); window.location.href = "index.html"; }
+async function loadResults(){
+  const d=await(await fetch('/api/results')).json();
+  document.getElementById('s1').textContent=d.stats.total;
+  document.getElementById('s2').textContent=d.stats.voted;
+  document.getElementById('s3').textContent=d.stats.left;
+  document.getElementById('winner').textContent='🏆 Current Leader: '+d.winner;
+  const ctx=document.getElementById('barChart').getContext('2d');
+  if(barChart)barChart.destroy();
+  barChart=new Chart(ctx,{type:'bar',data:{labels:d.labels,datasets:[{label:'Votes',data:d.data,backgroundColor:['#63b3ed','#fc8181','#68d391','#f6ad55'],borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+}
 
-        fetchResults(); fetchVoters();
-    </script>
+async function loadTimeline(){
+  const d=await(await fetch('/api/timeline')).json();
+  const ctx=document.getElementById('lineChart').getContext('2d');
+  if(lineChart)lineChart.destroy();
+  lineChart=new Chart(ctx,{type:'line',data:{labels:d.labels,datasets:[{label:'Votes',data:d.data,borderColor:'#63b3ed',backgroundColor:'rgba(99,179,237,.12)',fill:true,tension:.4,pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+}
+
+async function loadVoters(){
+  const d=await(await fetch('/api/admin/voters')).json();
+  const tb=document.getElementById('vtbody');tb.innerHTML='';
+  d.voters.forEach((v,i)=>{tb.innerHTML+=`<tr><td>${i+1}</td><td>${v.name}</td><td style="font-family:monospace">${v.cnic}</td><td>${v.hasVoted?'<span class="bv">✅ Voted</span>':'<span class="bn">⏳ Pending</span>'}</td></tr>`;});
+}
+
+async function loadAnomalies(){
+  const d=await(await fetch('/api/anomalies')).json();
+  const el=document.getElementById('anomDiv');
+  if(d.clean){el.innerHTML='<div class="clean">✅ No anomalies detected. Election integrity confirmed.</div>';return;}
+  el.innerHTML=d.anomalies.map(a=>`<div class="anom ${a.severity==='HIGH'?'anom-h':'anom-m'}"><div class="anom-type">${a.severity==='HIGH'?'🔴':'🟡'} ${a.type}</div><div class="anom-msg">${a.message}</div></div>`).join('');
+}
+
+async function loadIntegrity(){
+  const d=await(await fetch('/api/chain-integrity')).json();
+  const el=document.getElementById('intBadge');
+  el.innerHTML=d.valid?`<span class="badge ok-badge">🔒 Blockchain Intact — ${d.total_blocks} blocks verified</span>`:`<span class="badge err-badge">⚠️ Chain broken at block #${d.broken_at_block}</span>`;
+}
+
+function loadAll(){Promise.all([loadResults(),loadTimeline(),loadVoters(),loadAnomalies(),loadIntegrity()]);}
+
+function filterTable(){
+  const q=document.getElementById('search').value.toUpperCase();
+  document.querySelectorAll('#vtbody tr').forEach(r=>{r.style.display=r.textContent.toUpperCase().includes(q)?'':'none';});
+}
+
+function exportCSV(){
+  const rows=[['#','Name','CNIC','Status']];
+  document.querySelectorAll('#vtbody tr').forEach((r,i)=>{const c=r.querySelectorAll('td');rows.push([c[0].textContent,c[1].textContent,c[2].textContent,c[3].textContent.trim()]);});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));a.download='Election_Report.csv';a.click();
+}
+
+function logout(){localStorage.clear();window.location.href='index.html';}
+
+loadAll();
+setInterval(loadAll,10000);
+</script>
 </body>
 </html>

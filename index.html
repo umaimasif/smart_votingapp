@@ -1,157 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Voting App - Login</title>
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .login-container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 320px;
-            transition: transform 0.3s ease;
-        }
-        .login-container:hover {
-            transform: translateY(-5px);
-        }
-        h2 {
-            text-align: center;
-            color: #1a365d;
-            margin-top: 0;
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #4a5568;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus, input[type="password"]:focus {
-            border-color: #3182ce;
-            outline: none;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(to right, #3182ce, #2b6cb0);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(49, 130, 206, 0.3);
-        }
-        button:hover {
-            background: linear-gradient(to right, #2b6cb0, #2c5282);
-            box-shadow: 0 6px 8px rgba(49, 130, 206, 0.4);
-            transform: translateY(-2px);
-        }
-        #message {
-            text-align: center;
-            margin-top: 20px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .error { color: #e53e3e; }
-        .success { color: #38a169; }
-        </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Voting System – Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')})();</script>
+<style>
+:root{--bg:linear-gradient(135deg,#e0eafc,#cfdef3);--card:#fff;--text:#1a202c;--sub:#4a5568;--border:#e2e8f0;--accent:#2b6cb0;--accent2:#2c5282;--nav:#1a365d;--sh:rgba(0,0,0,.1)}
+[data-theme=dark]{--bg:linear-gradient(135deg,#0f1117,#1a1d27);--card:#1a1d27;--text:#e2e8f0;--sub:#a0aec0;--border:#2d3748;--accent:#63b3ed;--accent2:#4299e1;--nav:#0d1526;--sh:rgba(0,0,0,.4)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;transition:background .3s}
+nav{background:var(--nav);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.logo{color:#fff;font-weight:700;font-size:17px}.nav-r{display:flex;gap:12px;align-items:center}
+nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;font-weight:600}nav a:hover{color:#fff}
+.tbtn{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:15px}
+main{flex:1;display:flex;justify-content:center;align-items:center;padding:32px 16px}
+.card{background:var(--card);border-radius:20px;padding:44px 38px;width:400px;max-width:100%;box-shadow:0 16px 40px var(--sh);animation:up .5s ease}
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.head{text-align:center;margin-bottom:32px}.head h1{font-size:24px;color:var(--accent);font-weight:700}.head p{color:var(--sub);font-size:13px;margin-top:5px}
+label{display:block;color:var(--sub);font-size:13px;font-weight:600;margin-bottom:6px}
+input{width:100%;padding:12px 14px;margin-bottom:20px;border:2px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;transition:.2s}
+input:focus{outline:none;border-color:var(--accent)}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:8px;transition:.3s}
+.btn:hover:not(:disabled){background:var(--accent2);transform:translateY(-2px)}.btn:disabled{opacity:.7;cursor:not-allowed;transform:none}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+#msg{text-align:center;margin-top:14px;font-size:13px;font-weight:600;padding:9px 12px;border-radius:8px;display:none}
+.err{background:#fff5f5;color:#c53030}[data-theme=dark] .err{background:rgba(229,62,62,.12)}
+.ok{background:#f0fff4;color:#276749}[data-theme=dark] .ok{background:rgba(56,161,105,.12)}
+.links{text-align:center;margin-top:22px;font-size:13px;color:var(--sub)}.links a{color:var(--accent);text-decoration:none;font-weight:600}
+</style>
 </head>
 <body>
-
-    <div class="login-container">
-        <h2>Voting Login</h2>
-        <form id="loginForm">
-            <label for="cnic">CNIC:</label>
-            <input type="text" id="cnic" placeholder="42101-1234567-1" required pattern="\d{5}-\d{7}-\d{1}">
-            
-            <label for="password">Password:</label>
-            <input type="password" id="password" placeholder="********" required>
-            
-            <button type="submit">Login</button>
-            <p id="message"></p>
-        </form>
-    </div>
-
-    <script>
-        // --- JavaScript Logic ---
-        document.getElementById('loginForm').addEventListener('submit', async function(event) {
-            // Prevent the page from refreshing when clicking submit
-            event.preventDefault();
-
-            const cnic = document.getElementById('cnic').value;
-            const password = document.getElementById('password').value;
-            const messageElement = document.getElementById('message');
-
-            messageElement.textContent = "Logging in...";
-            messageElement.className = "";
-
-            try {
-                // Send data to our FastAPI backend
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ cnic: cnic, password: password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    messageElement.textContent = "✔ Login Success";
-                    messageElement.className = "success";
-                    
-                    localStorage.setItem("token", data.token);
-                    localStorage.setItem("userName", data.name);
-                    localStorage.setItem("hasVoted", data.hasVoted);
-                    localStorage.setItem("role", data.role); // Save their role
-
-                    // THE TRAFFIC COP: Redirect based on role
-                    setTimeout(() => {
-                        if (data.role === "admin") {
-                            window.location.href = "admin.html"; // Send admins here
-                        } else {
-                            window.location.href = "dashboard.html"; // Send voters here
-                        }
-                    }, 1000);
-                } else {
-                    // Login Failed (Wrong CNIC or Password)
-                    messageElement.textContent = "❌ " + data.detail;
-                    messageElement.className = "error";
-                }
-            } catch (error) {
-                console.error("Error connecting to server:", error);
-                messageElement.textContent = "❌ Cannot connect to server. Is it running?";
-                messageElement.className = "error";
-            }
-        });
-    </script>
+<nav>
+  <span class="logo">🗳️ Smart Voting System</span>
+  <div class="nav-r">
+    <a href="results.html">📊 Results</a>
+    <a href="blockchain.html">⛓️ Blockchain</a>
+    <button class="tbtn" id="tbtn" onclick="toggleTheme()">🌙</button>
+  </div>
+</nav>
+<main>
+  <div class="card">
+    <div class="head"><h1>Welcome Back 👋</h1><p>Secure · Transparent · Blockchain-Powered</p></div>
+    <form id="form">
+      <label>CNIC Number</label>
+      <input id="cnic" type="text" placeholder="42101-1234567-1" required pattern="\d{5}-\d{7}-\d{1}">
+      <label>Password</label>
+      <input id="pass" type="password" placeholder="••••••••" required>
+      <button class="btn" id="btn" type="submit">
+        <div class="spin" id="spin"></div><span id="btxt">Login Securely 🔐</span>
+      </button>
+    </form>
+    <div id="msg"></div>
+    <div class="links"><a href="results.html">📊 Live Results</a> &nbsp;·&nbsp; <a href="blockchain.html">⛓️ Explorer</a></div>
+  </div>
+</main>
+<script>
+const tbtn=document.getElementById('tbtn');
+tbtn.textContent=(localStorage.getItem('theme')||'light')==='dark'?'☀️':'🌙';
+function toggleTheme(){
+  const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);
+  tbtn.textContent=n==='dark'?'☀️':'🌙';
+}
+document.getElementById('form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=document.getElementById('btn'),spin=document.getElementById('spin'),
+        btxt=document.getElementById('btxt'),msg=document.getElementById('msg');
+  btn.disabled=true;spin.style.display='block';btxt.textContent='Logging in...';msg.style.display='none';
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({cnic:document.getElementById('cnic').value,password:document.getElementById('pass').value})});
+    const d=await r.json();
+    if(r.ok){
+      msg.textContent='✅ Success! Redirecting...';msg.className='ok';msg.style.display='block';
+      ['token','refreshToken','userName','hasVoted','role'].forEach((k,i)=>localStorage.setItem(k,[d.token,d.refresh_token||'',d.name,d.hasVoted,d.role][i]));
+      setTimeout(()=>{window.location.href=d.role==='admin'?'admin.html':'dashboard.html';},700);
+    }else{
+      msg.textContent='❌ '+(d.detail||'Login failed');msg.className='err';msg.style.display='block';
+      btn.disabled=false;spin.style.display='none';btxt.textContent='Login Securely 🔐';
+    }
+  }catch{
+    msg.textContent='❌ Cannot connect to server.';msg.className='err';msg.style.display='block';
+    btn.disabled=false;spin.style.display='none';btxt.textContent='Login Securely 🔐';
+  }
+});
+</script>
 </body>
 </html>

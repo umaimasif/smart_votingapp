@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blockchain Explorer – Smart Voting</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')})();</script>
+<style>
+:root{--bg:#f0f4f8;--card:#fff;--text:#1a202c;--sub:#4a5568;--border:#e2e8f0;--accent:#2b6cb0;--nav:#1a365d;--sh:rgba(0,0,0,.06);--ok:#38a169;--err:#e53e3e}
+[data-theme=dark]{--bg:#0f1117;--card:#1a1d27;--text:#e2e8f0;--sub:#a0aec0;--border:#2d3748;--accent:#63b3ed;--nav:#0d1526;--sh:rgba(0,0,0,.35)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s}
+nav{background:var(--nav);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.logo{color:#fff;font-weight:700;font-size:17px}.nav-r{display:flex;gap:12px;align-items:center}
+nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;font-weight:600}nav a:hover{color:#fff}
+.tbtn{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:15px}
+main{flex:1;padding:24px 16px}
+.wrap{max-width:1000px;margin:0 auto}
+.card{background:var(--card);border-radius:16px;padding:24px;box-shadow:0 4px 20px var(--sh);margin-bottom:18px}
+h3{font-size:15px;font-weight:700;margin-bottom:14px}
+/* Integrity badge */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:50px;font-weight:700;font-size:13px}
+.ok-badge{background:#f0fff4;color:#276749;border:2px solid #c6f6d5}[data-theme=dark] .ok-badge{background:rgba(56,161,105,.15)}
+.err-badge{background:#fff5f5;color:#c53030;border:2px solid #fed7d7}[data-theme=dark] .err-badge{background:rgba(229,62,62,.15)}
+/* Stats row */
+.stats-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:4px}
+.sstat{background:var(--bg);border-radius:10px;padding:14px 20px;text-align:center;flex:1;min-width:100px}
+.snum{font-size:26px;font-weight:700;color:var(--accent)}.slbl{font-size:11px;color:var(--sub);margin-top:3px}
+/* Verifier */
+.verify-row{display:flex;gap:10px;flex-wrap:wrap}
+input[type=text]{flex:1;min-width:200px;padding:10px 14px;border:2px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-family:'Inter',sans-serif;font-size:13px}
+input[type=text]:focus{outline:none;border-color:var(--accent)}
+.btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:.2s;background:var(--accent);color:#fff}
+.btn:hover{filter:brightness(.9)}
+/* Result box */
+.result-box{margin-top:14px;padding:14px 18px;border-radius:10px;font-size:13px;display:none}
+.result-ok{background:#f0fff4;border:2px solid #c6f6d5;color:#276749}[data-theme=dark] .result-ok{background:rgba(56,161,105,.1)}
+.result-err{background:#fff5f5;border:2px solid #fed7d7;color:#c53030}[data-theme=dark] .result-err{background:rgba(229,62,62,.1)}
+.result-row{display:flex;justify-content:space-between;margin-top:8px;font-size:12px}
+.result-key{color:var(--sub);font-weight:600}.result-val{font-family:monospace;word-break:break-all;text-align:right;max-width:60%}
+/* Table */
+.tscroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:12px}
+th{background:var(--accent);color:#fff;font-weight:600}
+tr:hover td{background:var(--bg)}
+.mono{font-family:monospace;font-size:11px}
+.bv{background:#f0fff4;color:#276749;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.bn{background:#fff5f5;color:#c53030;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+[data-theme=dark] .bv{background:rgba(56,161,105,.2)}[data-theme=dark] .bn{background:rgba(229,62,62,.2)}
+.empty{text-align:center;padding:30px;color:var(--sub)}
+/* Loading */
+.loading{text-align:center;padding:20px;color:var(--sub);font-size:13px}
+@media(max-width:600px){.stats-row{gap:10px}}
+</style>
+</head>
+<body>
+<nav>
+  <span class="logo">⛓️ Blockchain Explorer</span>
+  <div class="nav-r">
+    <a href="index.html">🔐 Login</a>
+    <a href="results.html">📊 Results</a>
+    <button class="tbtn" id="tbtn" onclick="toggleTheme()">🌙</button>
+  </div>
+</nav>
+<main>
+  <div class="wrap">
+
+    <!-- Integrity + Stats -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <div id="intBadge"><span class="badge">Checking chain…</span></div>
+        <div id="chainStats" class="stats-row"></div>
+      </div>
+    </div>
+
+    <!-- Vote Verifier -->
+    <div class="card">
+      <h3>🔍 Verify Your Vote</h3>
+      <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Enter your receipt hash or scan a QR code to verify your vote is recorded on the blockchain.</p>
+      <div class="verify-row">
+        <input type="text" id="hashInput" placeholder="Paste your receipt hash here…">
+        <button class="btn" onclick="verifyHash()">Verify</button>
+      </div>
+      <div class="result-box" id="verifyResult"></div>
+    </div>
+
+    <!-- Block Explorer -->
+    <div class="card">
+      <h3>📦 Block Explorer</h3>
+      <div class="tscroll">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Candidate</th>
+              <th>Timestamp</th>
+              <th>Hash</th>
+              <th>Prev Hash</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="chainBody"><tr><td colspan="6" class="loading">Loading blockchain…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+<script>
+const tbtn=document.getElementById('tbtn');
+tbtn.textContent=(localStorage.getItem('theme')||'light')==='dark'?'☀️':'🌙';
+function toggleTheme(){const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);tbtn.textContent=n==='dark'?'☀️':'🌙';}
+
+const CANDS={1:'Ahmed Khan',2:'Usman Ali',3:'Ayesha Noor',4:'Kamran Shah'};
+
+function short(h){return h?h.substring(0,12)+'…'+h.substring(h.length-6):'—'}
+
+async function loadChain(){
+  try{
+    const [chainRes,intRes]=await Promise.all([fetch('/api/blockchain'),fetch('/api/chain-integrity')]);
+    const chain=await chainRes.json();
+    const integrity=await intRes.json();
+
+    // Integrity badge
+    const ib=document.getElementById('intBadge');
+    ib.innerHTML=integrity.valid
+      ?`<span class="badge ok-badge">🔒 Blockchain Intact — ${integrity.total_blocks} blocks verified</span>`
+      :`<span class="badge err-badge">⚠️ Chain broken at block #${integrity.broken_at_block}</span>`;
+
+    // Stats
+    const valid=chain.chain.filter(b=>b.valid).length;
+    document.getElementById('chainStats').innerHTML=`
+      <div class="sstat"><div class="snum">${chain.length}</div><div class="slbl">Total Blocks</div></div>
+      <div class="sstat"><div class="snum" style="color:#38a169">${valid}</div><div class="slbl">Valid</div></div>
+      <div class="sstat"><div class="snum" style="color:#e53e3e">${chain.length-valid}</div><div class="slbl">Invalid</div></div>`;
+
+    // Table
+    const tbody=document.getElementById('chainBody');
+    if(!chain.chain.length){tbody.innerHTML='<tr><td colspan="6" class="empty">No votes recorded yet.</td></tr>';return;}
+    tbody.innerHTML=chain.chain.map(b=>`<tr>
+      <td><strong>${b.block}</strong></td>
+      <td>${CANDS[b.candidateID]||'Unknown'}</td>
+      <td class="mono">${b.time?b.time.replace('T',' ').split('.')[0]:'—'}</td>
+      <td class="mono" title="${b.hash}">${short(b.hash)}</td>
+      <td class="mono" title="${b.previousHash}">${b.block===1?'Genesis':short(b.previousHash)}</td>
+      <td>${b.valid?'<span class="bv">✅ Valid</span>':'<span class="bn">❌ Tampered</span>'}</td>
+    </tr>`).join('');
+  }catch(e){
+    document.getElementById('chainBody').innerHTML='<tr><td colspan="6" class="empty">Failed to load blockchain.</td></tr>';
+  }
+}
+
+async function verifyHash(){
+  const hash=document.getElementById('hashInput').value.trim();
+  const box=document.getElementById('verifyResult');
+  if(!hash){box.className='result-box result-err';box.style.display='block';box.innerHTML='Please enter a hash.';return;}
+  box.style.display='block';box.className='result-box';box.innerHTML='Searching…';
+  try{
+    const r=await fetch('/api/verify/'+encodeURIComponent(hash));
+    const d=await r.json();
+    if(r.ok&&d.found){
+      box.className='result-box result-ok';
+      box.innerHTML=`<strong>✅ Vote Found on Blockchain</strong>
+        <div class="result-row"><span class="result-key">Candidate</span><span class="result-val">${CANDS[d.block.candidateID]||'ID '+d.block.candidateID}</span></div>
+        <div class="result-row"><span class="result-key">Timestamp</span><span class="result-val">${d.block.time?d.block.time.replace('T',' '):'—'}</span></div>
+        <div class="result-row"><span class="result-key">Hash</span><span class="result-val">${short(d.block.hash)}</span></div>
+        <div class="result-row"><span class="result-key">Previous Hash</span><span class="result-val">${short(d.block.previousHash)}</span></div>`;
+    }else{
+      box.className='result-box result-err';
+      box.innerHTML='❌ Hash not found in blockchain. Vote may not be recorded.';
+    }
+  }catch{
+    box.className='result-box result-err';
+    box.innerHTML='❌ Could not connect to server.';
+  }
+}
+
+// Auto-fill from URL param (QR code scans)
+const urlHash=new URLSearchParams(location.search).get('verify');
+if(urlHash){document.getElementById('hashInput').value=urlHash;verifyHash();}
+
+loadChain();
+</script>
+</body>
+</html>

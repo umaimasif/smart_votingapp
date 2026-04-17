@@ -1,218 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Voting App - Dashboard</title>
-    <style>
-       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7fafc;
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .dashboard-container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            width: 450px;
-        }
-        h2 {
-            color: #1a365d;
-            text-align: center;
-            border-bottom: 2px solid #edf2f7;
-            padding-bottom: 15px;
-            margin-top: 0;
-        }
-        h3 {
-            color: #2d3748;
-            margin-top: 30px;
-        }
-        .status-box {
-            background-color: #edf2f7;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            text-align: center;
-            font-size: 15px;
-        }
-        .not-voted { color: #e53e3e; font-weight: 700; }
-        .voted { color: #38a169; font-weight: 700; }
-        
-        .candidate-card {
-            border: 1px solid #e2e8f0;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-        .candidate-card:hover {
-            border-color: #cbd5e0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transform: translateY(-2px);
-        }
-        .candidate-info h4 {
-            margin: 0 0 5px 0;
-            color: #2b6cb0;
-            font-size: 16px;
-        }
-        .candidate-info p {
-            margin: 0;
-            font-size: 13px;
-            color: #718096;
-            font-weight: 600;
-        }
-        .vote-btn {
-            padding: 8px 20px;
-            background-color: #3182ce;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .vote-btn:hover:not(:disabled) {
-            background-color: #2b6cb0;
-        }
-        .vote-btn:disabled {
-            background-color: #cbd5e0;
-            color: #a0aec0;
-            cursor: not-allowed;
-        }
-        .btn-logout {
-            width: 100%;
-            padding: 12px;
-            background-color: #fc8181;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 30px;
-            transition: background-color 0.2s;
-        }
-        .btn-logout:hover {
-            background-color: #e53e3e;
-        }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voter Dashboard – Smart Voting</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')})();</script>
+<style>
+:root{--bg:#f7fafc;--card:#fff;--text:#1a202c;--sub:#4a5568;--border:#e2e8f0;--accent:#2b6cb0;--accent2:#2c5282;--nav:#1a365d;--sh:rgba(0,0,0,.07);--success:#38a169;--danger:#e53e3e}
+[data-theme=dark]{--bg:#0f1117;--card:#1a1d27;--text:#e2e8f0;--sub:#a0aec0;--border:#2d3748;--accent:#63b3ed;--accent2:#4299e1;--nav:#0d1526;--sh:rgba(0,0,0,.35)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s}
+nav{background:var(--nav);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.logo{color:#fff;font-weight:700;font-size:17px}.nav-r{display:flex;gap:12px;align-items:center}
+nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;font-weight:600}nav a:hover{color:#fff}
+.tbtn{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:15px}
+main{flex:1;display:flex;justify-content:center;padding:28px 16px}
+.wrap{width:100%;max-width:520px}
+.card{background:var(--card);border-radius:16px;padding:26px;box-shadow:0 4px 20px var(--sh);margin-bottom:18px}
+h2{font-size:20px;margin-bottom:20px}
+.status{background:var(--bg);border:2px solid var(--border);border-radius:12px;padding:16px;text-align:center;margin-bottom:22px}
+.status-lbl{font-size:13px;color:var(--sub);margin-bottom:4px}
+.not-voted{color:var(--danger);font-weight:700;font-size:16px}.voted-ok{color:var(--success);font-weight:700;font-size:16px}
+h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.cand{border:2px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;transition:.2s}
+.cand:hover:not(.disabled){border-color:var(--accent);box-shadow:0 4px 14px var(--sh);transform:translateY(-2px)}
+.cand.disabled{opacity:.55}
+.cname{font-weight:700;font-size:14px;margin-bottom:3px}.cparty{font-size:12px;color:var(--sub)}
+.vbtn{padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:.2s}
+.vbtn:hover:not(:disabled){background:var(--accent2)}.vbtn:disabled{background:#cbd5e0;color:#718096;cursor:not-allowed}
+.logout{width:100%;background:var(--danger);color:#fff;border:none;padding:13px;border-radius:10px;cursor:pointer;font-weight:700;font-size:14px;transition:.2s}
+.logout:hover{filter:brightness(.9)}
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:999;display:none;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.overlay.show{display:flex}
+.modal{background:var(--card);border-radius:20px;padding:36px 32px;max-width:420px;width:92%;text-align:center;animation:popIn .35s ease;position:relative}
+@keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+/* Confirm view */
+.modal h3{font-size:20px;margin-bottom:10px}
+.modal p{color:var(--sub);font-size:14px;margin-bottom:22px}
+.warn{color:var(--danger);font-size:13px;font-weight:600;background:#fff5f5;border-radius:8px;padding:8px 12px;margin-bottom:18px}
+[data-theme=dark] .warn{background:rgba(229,62,62,.1)}
+.mbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.mbtn-yes{background:var(--accent);color:#fff;border:none;padding:11px 26px;border-radius:9px;cursor:pointer;font-weight:700;font-size:14px;transition:.2s}
+.mbtn-yes:hover{background:var(--accent2)}.mbtn-cancel{background:transparent;color:var(--sub);border:2px solid var(--border);padding:11px 26px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px}
+/* Receipt view */
+.check-anim{font-size:64px;animation:bounce .6s ease}
+@keyframes bounce{0%,100%{transform:scale(1)}40%{transform:scale(1.4)}}
+.receipt-title{color:var(--success);font-size:22px;font-weight:700;margin:12px 0 6px}
+.hash-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:monospace;font-size:10px;word-break:break-all;color:var(--sub);margin:10px 0}
+#qrWrap{display:flex;justify-content:center;margin:12px 0}
+.mbtn-dl{background:var(--success);color:#fff;border:none;padding:10px 22px;border-radius:9px;cursor:pointer;font-weight:700;font-size:13px}
+.mbtn-close{background:transparent;color:var(--sub);border:2px solid var(--border);padding:10px 22px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13px}
+@media(max-width:480px){.card{padding:18px}.modal{padding:26px 20px}}
+</style>
 </head>
 <body>
-
-    <div class="dashboard-container">
-        <h2 id="welcomeMessage">Welcome, Voter</h2>
-        
-        <div class="status-box">
-            <p>Vote Status:</p>
-            <p id="voteStatus" class="not-voted">Checking status...</p>
-        </div>
-
-        <h3>Candidates</h3>
-        
-        <div class="candidate-card">
-            <div class="candidate-info">
-                <h4>1️⃣ Ahmed Khan</h4>
-                <p>Party: ABC</p>
-            </div>
-            <button class="vote-btn" onclick="castVote(1)">Vote</button>
-        </div>
-
-        <div class="candidate-card">
-            <div class="candidate-info">
-                <h4>2️⃣ Usman Ali</h4>
-                <p>Party: XYZ</p>
-            </div>
-            <button class="vote-btn" onclick="castVote(2)">Vote</button>
-        </div>
-        <div class="candidate-card">
-            <div class="candidate-info">
-                <h4>3️⃣ Ayesha Noor</h4>
-                <p>Party: DEF</p>
-            </div>
-            <button class="vote-btn" onclick="castVote(3)">Vote</button>
-        </div>
-
-        <div class="candidate-card">
-            <div class="candidate-info">
-                <h4>4️⃣ Kamran Shah</h4>
-                <p>Party: LMN</p>
-            </div>
-            <button class="vote-btn" onclick="castVote(4)">Vote</button>
-        </div>
-        <button style="width: 100%; background-color: #dc3545; margin-top: 20px;" onclick="logout()">Logout</button>
+<nav>
+  <span class="logo">🗳️ Smart Voting</span>
+  <div class="nav-r">
+    <a href="results.html">📊 Results</a>
+    <a href="blockchain.html">⛓️ Blockchain</a>
+    <button class="tbtn" id="tbtn" onclick="toggleTheme()">🌙</button>
+  </div>
+</nav>
+<main>
+  <div class="wrap">
+    <div class="card">
+      <h2 id="welcome">Welcome 👋</h2>
+      <div class="status"><div class="status-lbl">Your Vote Status</div><div id="statusTxt" class="not-voted">Checking…</div></div>
+      <h3>🏛️ Candidates</h3>
+      <div id="candList"></div>
+      <button class="logout" onclick="logout()">🚪 Logout</button>
     </div>
-     <script>
-        const token = localStorage.getItem("token");
-        if (!token) { alert("Please log in."); window.location.href = "index.html"; }
+  </div>
+</main>
 
-        const userName = localStorage.getItem("userName");
-        const hasVoted = localStorage.getItem("hasVoted") === "true"; 
-        
-        document.getElementById("welcomeMessage").textContent = "Welcome, " + userName;
-        const statusElement = document.getElementById("voteStatus");
-        const voteButtons = document.querySelectorAll(".vote-btn");
+<!-- Confirm Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <!-- Confirm view -->
+    <div id="confirmView">
+      <h3>Confirm Your Vote</h3>
+      <p>You are voting for <strong id="candNameDisplay"></strong></p>
+      <div class="warn">⚠️ This action is permanent and cannot be undone.</div>
+      <div class="mbtns">
+        <button class="mbtn-yes" onclick="submitVote()">✅ Yes, Cast My Vote</button>
+        <button class="mbtn-cancel" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+    <!-- Receipt view -->
+    <div id="receiptView" style="display:none">
+      <div class="check-anim">✅</div>
+      <div class="receipt-title">Vote Recorded!</div>
+      <p style="color:var(--sub);font-size:13px;margin-bottom:6px">Your blockchain receipt hash:</p>
+      <div class="hash-box" id="hashDisplay"></div>
+      <div id="qrWrap"></div>
+      <div class="mbtns">
+        <button class="mbtn-dl" onclick="downloadReceipt()">📥 Download Receipt</button>
+        <button class="mbtn-close" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        if (hasVoted) {
-            statusElement.textContent = "✔ You have already voted.";
-            statusElement.className = "voted";
-            voteButtons.forEach(btn => btn.disabled = true);
-            
-            // NEW: Show Download Receipt Button if they already voted!
-            const receiptBtn = document.createElement("button");
-            receiptBtn.textContent = "📥 Download Blockchain Receipt";
-            receiptBtn.style.backgroundColor = "#48bb78";
-            receiptBtn.style.width = "100%";
-            receiptBtn.style.marginTop = "10px";
-            receiptBtn.onclick = downloadReceipt;
-            statusElement.parentElement.appendChild(receiptBtn);
-        } else {
-            statusElement.textContent = "❌ Not Voted Yet";
-            statusElement.className = "not-voted";
-        }
+<script>
+if(!localStorage.getItem('token')){window.location.href='index.html';}
+const tbtn=document.getElementById('tbtn');
+tbtn.textContent=(localStorage.getItem('theme')||'light')==='dark'?'☀️':'🌙';
+function toggleTheme(){const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);tbtn.textContent=n==='dark'?'☀️':'🌙';}
 
-        async function castVote(candidateID) {
-            if (!confirm("Are you sure? You cannot change your vote later!")) return;
-            try {
-                const response = await fetch('/api/vote', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ candidateID: candidateID })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    localStorage.setItem("hasVoted", "true");
-                    localStorage.setItem("receiptHash", data.receiptHash); // Save the secure hash
-                    alert("✔ " + data.message);
-                    window.location.reload(); 
-                } else {
-                    alert("❌ " + data.detail);
-                }
-            } catch (error) { alert("❌ Cannot connect to server."); }
-        }
+const CANDS=[{id:1,name:'1️⃣ Ahmed Khan',party:'Pakistan Alliance Party'},{id:2,name:'2️⃣ Usman Ali',party:'National Progress Movement'},{id:3,name:'3️⃣ Ayesha Noor',party:'Democratic Future Party'},{id:4,name:'4️⃣ Kamran Shah',party:'United Citizens Front'}];
+const token=localStorage.getItem('token');
+const userName=localStorage.getItem('userName')||'Voter';
+const hasVoted=localStorage.getItem('hasVoted')==='true';
 
-        // NEW: Generate a Text File Receipt
-        function downloadReceipt() {
-            const hash = localStorage.getItem("receiptHash") || "Hash retrieved from backend secure log.";
-            const text = `--- OFFICIAL VOTING RECEIPT ---\nName: ${userName}\nStatus: Voted\nBlockchain Hash: ${hash}\nDate: ${new Date().toLocaleString()}`;
-            const blob = new Blob([text], { type: 'text/plain' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `Vote_Receipt_${userName}.txt`;
-            link.click();
-        }
+document.getElementById('welcome').textContent=`Welcome, ${userName} 👋`;
+const stEl=document.getElementById('statusTxt');
+stEl.textContent=hasVoted?'✅ You have already voted':'⏳ You have not voted yet';
+stEl.className=hasVoted?'voted-ok':'not-voted';
 
-        function logout() { localStorage.clear(); window.location.href = "index.html"; }
-    </script>
-    
+const list=document.getElementById('candList');
+CANDS.forEach(c=>{
+  const el=document.createElement('div');
+  el.className='cand'+(hasVoted?' disabled':'');
+  el.innerHTML=`<div><div class="cname">${c.name}</div><div class="cparty">${c.party}</div></div>
+  <button class="vbtn" ${hasVoted?'disabled':''} onclick="openConfirm(${c.id},'${c.name}')">Vote</button>`;
+  list.appendChild(el);
+});
 
-        
+let pendingID=null,pendingName='',receiptHash='';
+function openConfirm(id,name){pendingID=id;pendingName=name;document.getElementById('candNameDisplay').textContent=name;document.getElementById('confirmView').style.display='';document.getElementById('receiptView').style.display='none';document.getElementById('overlay').classList.add('show');}
+function closeModal(){document.getElementById('overlay').classList.remove('show');if(localStorage.getItem('hasVoted')==='true')window.location.reload();}
+
+async function submitVote(){
+  try{
+    const r=await fetch('/api/vote',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({candidateID:pendingID})});
+    const d=await r.json();
+    if(r.ok){
+      receiptHash=d.receiptHash;
+      localStorage.setItem('hasVoted','true');localStorage.setItem('receiptHash',receiptHash);
+      document.getElementById('hashDisplay').textContent=receiptHash;
+      document.getElementById('confirmView').style.display='none';
+      document.getElementById('receiptView').style.display='';
+      const qrEl=document.getElementById('qrWrap');qrEl.innerHTML='';
+      QRCode.toCanvas(document.createElement('canvas'),`${location.origin}/blockchain.html?verify=${receiptHash}`,{width:150},function(err,canvas){if(!err)qrEl.appendChild(canvas);});
+    }else{alert('❌ '+(d.detail||'Vote failed'));closeModal();}
+  }catch{alert('❌ Cannot connect to server.');}
+}
+
+function downloadReceipt(){
+  const txt=`--- SMART VOTING RECEIPT ---\nVoter: ${userName}\nCandidate: ${pendingName}\nBlockchain Hash: ${receiptHash}\nVerify: ${location.origin}/blockchain.html?verify=${receiptHash}\nDate: ${new Date().toLocaleString()}`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download=`Vote_Receipt_${userName.replace(' ','_')}.txt`;a.click();
+}
+function logout(){localStorage.clear();window.location.href='index.html';}
+</script>
 </body>
 </html>
