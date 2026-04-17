@@ -12,7 +12,7 @@ import hashlib # NEW: Used for Blockchain Security
 app = FastAPI(title="Smart Voting System API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://umaimaasif:umaima123456.@cluster0.amdgtd5.mongodb.net/?retryWrites=true&w=majority")
 client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
 db = client["voting_database"]
 users_collection = db["users"]
@@ -66,7 +66,7 @@ def login(request: LoginRequest):
         "name": user["name"], "hasVoted": user.get("hasVoted", False), "role": user.get("role", "voter")
     }
 
-@app.post("/vote")
+@app.post("/api/vote")
 def cast_vote(request: VoteRequest, authorization: str = Header(None)):
     if not authorization: raise HTTPException(status_code=401, detail="Not logged in")
     try: user_cnic = jwt.decode(authorization.split(" ")[1], SECRET_KEY, algorithms=[ALGORITHM]).get("sub")

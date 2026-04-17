@@ -61,7 +61,7 @@
         async function fetchResults() {
             try {
                 // 1. Ask our Python backend for the vote counts
-                const response = await fetch('http://127.0.0.1:8000/results');
+                const response = await fetch('/api/results');
                 const data = await response.json();
 
                 // 2. Get the Canvas element from HTML

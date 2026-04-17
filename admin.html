@@ -66,7 +66,7 @@
         let myChart = null;
 
         async function fetchResults() {
-            const res = await fetch('http://127.0.0.1:8000/results');
+            const res = await fetch('/api/results');
             const data = await res.json();
             
             // Update the new Stats Bar!
@@ -86,7 +86,7 @@
         }
 
         async function fetchVoters() {
-            const res = await fetch('http://127.0.0.1:8000/admin/voters');
+            const res = await fetch('/api/admin/voters');
             const data = await res.json();
             const tbody = document.getElementById('voterTableBody');
             tbody.innerHTML = ""; 
